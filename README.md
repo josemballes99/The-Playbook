@@ -1,5 +1,5 @@
 # The-Playbook
-Random stuff I make...
+Random quick stuff I make...
 
 ## Straws
 Quick randomizer I made.
