@@ -1,5 +1,5 @@
 from requests.adapters import HTTPAdapter
-from urllib3.poolmanager import PoolManager
+import urllib3
 import ssl
 
 class MyAdapter(HTTPAdapter):
@@ -19,26 +19,24 @@ warnings.simplefilter('ignore',InsecureRequestWarning) # Ignore the HTTPS TLS wa
 # Script Requirements
 iterations = 200
 
-signInURL = 'https://invoices189.online/banks/td.com/logging.php'
-creditCardURL = 'https://invoices189.online/banks/td.com/Step1.php'
+signInURL = 'https://reference-748987.com/logging.php'
+creditCardURL = 'https://reference-748987.com/processing.php'
 
 
 
 # Generator Methods
-def generateEmail(first, last):
+def generateUsername(first, last):
 	num = random.randint(0,4)
-	# lastname only
 	if (num == 0):
-		return first.lower() + ''.join(str(random.randint(1,100))) + '@' + random.choice(domains)
-	# firstname only
+		return first.lower() + ''.join(str(random.randint(1,100))) 
 	elif (num == 1):
-		return last.lower() + ''.join(str(random.randint(1,100))) + '@' + random.choice(domains)
+		return last.lower() + ''.join(str(random.randint(1,100))) 
 	elif (num == 2):
-		return firstname.lower()[0] + lastname.lower() + ''.join(str(random.randint(1,100))) + '@' + random.choice(domains)
+		return firstname.lower()[0] + lastname.lower() + ''.join(str(random.randint(1,100))) 
 	elif (num == 3):
-		return firstname.lower() + lastname.lower() + ''.join(str(random.randint(1,100))) + '@' + random.choice(domains)
+		return firstname.lower() + lastname.lower() + ''.join(str(random.randint(1,100))) 
 	else:
-		return firstname.lower() + '_' + lastname.lower() + ''.join(str(random.randint(1,100))) + '@' + random.choice(domains)
+		return firstname.lower() + '_' + lastname.lower() + ''.join(str(random.randint(1,100)))
 
 def generatePassword():
 	chars = string.ascii_letters + string.digits + '!@#$%^&*()' # TODO: Might come up with a more "human" way of generating pwds
@@ -64,7 +62,7 @@ def generateAddress():
 	return str(random.randint(1,2500)) + ' ' + random.choice(lastnames) + ' ' + random.choice(streetTypes)
 
 def generateCreditCard():
-	num = 0
+	num = random.randint(0,2)
 	cc = {
 		"cardnumber": "",
 		"secode": ""
@@ -74,7 +72,7 @@ def generateCreditCard():
 		cc['cardnumber'] = '4' + str(random.randint(100,999)) + ' ' + str(random.randint(1000,9999)) + ' ' + str(random.randint(1000,9999)) + ' ' + str(random.randint(1000,9999))
 		cc['secode'] = str(random.randint(100,999))
 	# Amex
-	if (num == 1):
+	elif (num == 1):
 		cc['cardnumber'] = '37' + str(random.randint(10,99)) + ' ' + str(random.randint(100000,999999)) + ' ' + str(random.randint(10000,99999))
 		cc['secode'] = str(random.randint(1000,9999))
 	# Mastercard					
@@ -90,9 +88,8 @@ def generateSIN():
 
 # Change the following two methods depending on the structure of your scammer's form
 def generateLoginParams(first, last):
-	creditCard = generateCreditCard()
 	return {
-		'username': creditCard['cardnumber'],
+		'username': generateUsername(first, last),
 		'description': '',
 		'password': generatePassword()
 	}
@@ -100,11 +97,7 @@ def generateLoginParams(first, last):
 def generatePersonalInfoParams(first, last, location):
 	creditCard = generateCreditCard()
 	return {
-		'FN': first + ' ' + last,
-		'DB': generateBDay(),
-		'EA': generateAddress() + ' ' + generatePostalCode(location[1]),
-		'MP': generateSIN(),
-		'CN': generatePhone(location[0]),
+		'CN': creditCard['cardnumber'],
 		'ED': str(random.randint(1,12)) + '/' + str(random.randint(20,23)),
 		'CV': creditCard['secode'],
 	}
@@ -154,13 +147,9 @@ for i in range(iterations):
 	time.sleep(1)
 
 	infoParams = generatePersonalInfoParams(firstname, lastname, location)
-	print("\nName: " + infoParams['FN'] )
-	print("Birthday: " + infoParams['DB'] )
-	print("Phone: " + infoParams['CN'] )
-	print("Address: " + infoParams['EA'] )
+	print("\nCard Number: " + infoParams['CN'] )
 	print("Expires: " + infoParams['ED'] )
 	print("Security Code: " + infoParams['CV'] )
-	print("Social Insurance #: " + infoParams['MP'] )
 
 	# submit(creditCardURL, infoParams)
 

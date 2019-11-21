@@ -76,7 +76,7 @@ def generateCreditCard():
 		cc['cardnumber'] = '4' + str(random.randint(100,999)) + ' ' + str(random.randint(1000,9999)) + ' ' + str(random.randint(1000,9999)) + ' ' + str(random.randint(1000,9999))
 		cc['secode'] = str(random.randint(100,999))
 	# Amex
-	if (num == 1):
+	elif (num == 1):
 		cc['cardnumber'] = '37' + str(random.randint(10,99)) + ' ' + str(random.randint(100000,999999)) + ' ' + str(random.randint(10000,99999))
 		cc['secode'] = str(random.randint(1000,9999))
 	# Mastercard					
