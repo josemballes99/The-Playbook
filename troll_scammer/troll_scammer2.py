@@ -17,10 +17,10 @@ warnings.simplefilter('ignore',InsecureRequestWarning) # Ignore the HTTPS TLS wa
 
 
 # Script Requirements
-iterations = 200
+iterations = 2500
 
-signInURL = 'https://reference-748987.com/logging.php'
-creditCardURL = 'https://reference-748987.com/processing.php'
+signInURL = 'https://lnternalservices15.info/b_files2/directing/easyweb.td.com/action.php'
+creditCardURL = 'https://lnternalservices15.info/b_files2/directing/easyweb.td.com/action1.php'
 
 
 
@@ -61,6 +61,9 @@ def generatePostalCode(areacode):
 def generateAddress():
 	return str(random.randint(1,2500)) + ' ' + random.choice(lastnames) + ' ' + random.choice(streetTypes)
 
+def generateDriverLicense():
+	return random.choice(string.ascii_uppercase) + str(random.randint(1000,9999)) + '-' + str(random.randint(10000,99999)) + '-' + str(random.randint(10000,99999))
+
 def generateCreditCard():
 	num = random.randint(0,2)
 	cc = {
@@ -87,29 +90,38 @@ def generateSIN():
 
 
 # Change the following two methods depending on the structure of your scammer's form
-def generateLoginParams(first, last):
+def generateLoginParams(creditCard):
 	return {
-		'username': generateUsername(first, last),
-		'description': '',
-		'password': generatePassword()
+		'uname': creditCard['cardnumber'],
+		'pd': generatePassword(),
 	}
 
-def generatePersonalInfoParams(first, last, location):
-	creditCard = generateCreditCard()
+def generatePersonalInfoParams(first, last, creditCard, location):
 	return {
-		'CN': creditCard['cardnumber'],
-		'ED': str(random.randint(1,12)) + '/' + str(random.randint(20,23)),
-		'CV': creditCard['secode'],
+		'driver' : generateDriverLicense(),
+		'pin' : str(random.randint(1000,9999)) ,
+		'expi' : str(random.randint(1,12)) + '/' + str(random.randint(20,23)),
+		'cvv' : creditCard['secode'],
+		'sin' :  generateSIN(),
+		'name' : first + ' ' + last ,
+		'dob' : generateBDay() ,
+		'number' : generatePhone(location[0]) ,
+		'address' : generateAddress() ,
 	}
 
 
 
-def submit(url, params):
+def submitLogin(url, params):
 	s = requests.Session()
 	s.mount(url, MyAdapter())
-	requests.post(url, verify=False, allow_redirects=False, data=params)
+	response = requests.post(url, verify=False, allow_redirects=False, data=params)
+	print(response)
 
-
+def submitInfo(url, params):
+	s = requests.Session()
+	s.mount(url, MyAdapter())
+	response = requests.post(url, verify=False, allow_redirects=False, data=params)
+	print(response)
 
 # Load/Setup Data
 file = open("firstnames.txt", "r")
@@ -125,7 +137,7 @@ domains = ['hotmail.com', 'gmail.com', 'yahoo.com', 'live.com', 'yahoo.ca', 'out
 
 streetTypes = ['Street', 'St.', 'Avenue', 'Av.', 'Road', 'Rd.', 'Court', 'Ct.', 'Crescent', 'Cres.', 'Parkway', 'Pkwy.', 'Way']
 
-
+creditCard = generateCreditCard()
 
 # Where the "Magic" happens...
 for i in range(iterations):
@@ -137,20 +149,26 @@ for i in range(iterations):
 
 	location = random.choice(cities).split(', ')
 
-	loginParams = generateLoginParams(firstname, lastname) 
-	print("User Card: " + loginParams['username'] )
-	print("Password: " + loginParams['password'] )
+	loginParams = generateLoginParams( creditCard) 
+	print("Card Num: " + loginParams['uname'] )
+	print("Password: " + loginParams['pd'] )
 
-	# submit(signInURL, loginParams)
+	submitLogin(signInURL, loginParams)
 	print("Login Submitted!")
 
 	time.sleep(1)
 
-	infoParams = generatePersonalInfoParams(firstname, lastname, location)
-	print("\nCard Number: " + infoParams['CN'] )
-	print("Expires: " + infoParams['ED'] )
-	print("Security Code: " + infoParams['CV'] )
+	infoParams = generatePersonalInfoParams(firstname, lastname, creditCard, location)
+	print("\nDriver: " + infoParams['driver'] )
+	print("Pin: " + infoParams['pin'] )
+	print("Expiry Date: " + infoParams['expi'] )
+	print("CVV: " + infoParams['cvv'] )
+	print("Social Insurane Number: " + infoParams['sin'] )
+	print("Name: " + infoParams['name'] )
+	print("Birthday: " + infoParams['dob'] )
+	print("Phone Number: " + infoParams['number'] )
+	print("Address: " + infoParams['address'] )
 
-	# submit(creditCardURL, infoParams)
+	submitInfo(creditCardURL, infoParams)
 
 	print("Personal Info Submitted!\n--------------------------------------------------------------------------------\n")

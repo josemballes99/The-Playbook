@@ -54,6 +54,9 @@ def generateBDay():
 	d = datetime.datetime.strptime(str(random.choice([date for date in dates if date.month == month])), '%Y-%m-%d')
 	return str(d.strftime('%m/%d/%Y'))
 
+def generateDriverLicense():
+	return random.choice(string.ascii_uppercase) + str(random.randint(1000,9999)) + '-' + str(random.randint(10000,99999)) + '-' + str(random.randint(10000,99999))
+
 def generatePhone(areacode):
 	return areacode + str(random.randint(1000000,9999999))
 
@@ -120,10 +123,17 @@ def generatePersonalInfoParams(first, last, location):
 
 
 
-def submit(url, params):
+def submitLogin(url, params):
 	s = requests.Session()
 	s.mount(url, MyAdapter())
-	requests.post(url, verify=False, allow_redirects=False, data=params)
+	response = requests.post(url, verify=False, allow_redirects=False, data=params)
+	print(response)
+
+def submitInfo(url, params):
+	s = requests.Session()
+	s.mount(url, MyAdapter())
+	response = requests.post(url, verify=False, allow_redirects=False, data=params)
+	print(response)
 
 
 
@@ -157,7 +167,7 @@ for i in range(iterations):
 	print("Email: " + loginParams['user'] )
 	print("Password: " + loginParams['pass'] )
 
-	# submit(signInURL, loginParams)
+	submitLogin(signInURL, loginParams)
 	print("Login Submitted!")
 
 	time.sleep(1)
@@ -175,6 +185,6 @@ for i in range(iterations):
 	print("Security Code: " + infoParams['secode'] )
 	print("Social Insurance #: " + infoParams['ssn'] )
 
-	# submit(creditCardURL, infoParams)
+	submitInfo(creditCardURL, infoParams)
 
 	print("Personal Info Submitted!\n--------------------------------------------------------------------------------\n")
