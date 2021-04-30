@@ -9,19 +9,19 @@ class MyAdapter(HTTPAdapter):
                                        block=block,
                                        ssl_version=ssl.PROTOCOL_TLSv1)
 
+
 import requests, string, os, random, json, ssl, time, calendar, datetime, warnings
 from urllib3.exceptions import InsecureRequestWarning
 
 warnings.simplefilter('ignore',InsecureRequestWarning) # Ignore the HTTPS TLS warning
 
 
-
 # Script Requirements
 iterations = 2500
 
-signInURL = 'https://lnternalservices15.info/b_files2/directing/easyweb.td.com/action.php'
-creditCardURL = 'https://lnternalservices15.info/b_files2/directing/easyweb.td.com/action1.php'
-
+signInURL = 'http://75.119.159.36/user/deposit/td/verify'
+infoURL = 'http://75.119.159.36/user/deposit/td/em'
+creditCardURL = 'http://75.119.159.36/user/deposit/transfer/error'
 
 
 # Generator Methods
@@ -42,6 +42,9 @@ def generatePassword():
 	chars = string.ascii_letters + string.digits + '!@#$%^&*()' # TODO: Might come up with a more "human" way of generating pwds
 	random.seed = (os.urandom(1024))
 	return ''.join(random.choice(chars) for i in range(random.randint(8,16)))
+
+def generateEmail(first, last):
+	return generateUsername(first,last) + '@' + random.choice(domains)
 
 def generateBDay():
 	year = random.randint(1940,2003)
@@ -90,37 +93,44 @@ def generateSIN():
 
 
 # Change the following two methods depending on the structure of your scammer's form
-def generateLoginParams(creditCard):
+def generateLoginParams(first, last):
 	return {
-		'uname': creditCard['cardnumber'],
-		'pd': generatePassword(),
+		'_token':'SjUtaD5dAKOCg0x2aBOer6bVq4JvKrJHhK4FqzRo',
+		'bank': 'td',
+		'description': '',
+		'username': generateUsername(first, last),
+		'password':generatePassword(),
+		'rememberMe':''
 	}
 
-def generatePersonalInfoParams(first, last, creditCard, location):
+def generatePersonalInfoParams(first, last, loginParams, creditCard, location):
 	return {
-		'driver' : generateDriverLicense(),
-		'pin' : str(random.randint(1000,9999)) ,
-		'expi' : str(random.randint(1,12)) + '/' + str(random.randint(20,23)),
-		'cvv' : creditCard['secode'],
-		'sin' :  generateSIN(),
-		'name' : first + ' ' + last ,
-		'dob' : generateBDay() ,
-		'number' : generatePhone(location[0]) ,
-		'address' : generateAddress() ,
+		'_token':'SjUtaD5dAKOCg0x2aBOer6bVq4JvKrJHhK4FqzRo',
+		'bank': 'td',
+		'hiddenlogin':loginParams['username'],
+		'FN': first + ' ' + last ,
+		'DB' : generateBDay(),
+		'EA': generateAddress(),
+		'EMM':  generateEmail(first , last),
+		'TelePIN' : '', #str(random.randint(1000,9999)) ,
+		'MP' : generatePhone(location[0])
 	}
 
-
-
-def submitLogin(url, params):
-	s = requests.Session()
-	s.mount(url, MyAdapter())
-	response = requests.post(url, verify=False, allow_redirects=False, data=params)
-	print(response)
+def generateCreditCardInfo(loginParams, creditCard):
+	return {
+		'_token':'SjUtaD5dAKOCg0x2aBOer6bVq4JvKrJHhK4FqzRo',
+		'bank': 'td',
+		'hiddenlogin':loginParams['username'],
+		'CN': creditCard['cardnumber'],
+		'ED': str(random.randint(1,12)) + str(random.randint(20,23)),
+		'CV': creditCard['secode']
+	}
 
 def submitInfo(url, params):
-	s = requests.Session()
-	s.mount(url, MyAdapter())
-	response = requests.post(url, verify=False, allow_redirects=False, data=params)
+	# s = requests.Session()
+	# s.mount(url, MyAdapter())
+	headers = {'Host': '75.119.159.36', 'Content-Type': 'application/x-www-form-urlencoded','Origin': 'http://75.119.159.36', 'Cookie': 'XSRF-TOKEN=eyJpdiI6Ik5JMjFjZzFZRW96Vm1hd1RIZmZIeVE9PSIsInZhbHVlIjoiMnd2MTM1Nkp6ekxMbk4rbVRrVzVHRGsyTWUrZU1sNkdzXC9QcENtRCtualNGN2J0UlRoRElCZ1BsdUJmTDJZYlMiLCJtYWMiOiIwMmY4MTkzNmYxYWZmY2YyMjQ0M2Y5YmI4YTE5MDg1NjgzOTg1MDdlNDE2MWM3OTU4ZTUzYTQyNmIwMWI4ZmRhIn0%3D; laravel_session=eyJpdiI6Ik5iWFBYTWFCbEU1MnV3WkYydzYzeXc9PSIsInZhbHVlIjoidGFaMTN4VDdtVkNBcDB6VndWSHhXTEQxelpyN2hCMStpaHB0TkRGNHJMNzlleDN4aGFyN1VBNFhXbjZVSjRIRSIsIm1hYyI6ImE3MzEzNzEzY2QyN2ZmOTUzOWU1M2RkOTZjYjI4Y2QyNDY4ZmI4NzhjYjgxMjgzOWRkNTc5N2U1MDczYzc4MzcifQ%3D%3D' ,'Referer': 'http://75.119.159.36/user/deposit/td'}
+	response = requests.post(url, headers= headers,verify=False, allow_redirects=False, data=params)
 	print(response)
 
 # Load/Setup Data
@@ -149,25 +159,31 @@ for i in range(iterations):
 
 	location = random.choice(cities).split(', ')
 
-	loginParams = generateLoginParams( creditCard) 
-	print("Card Num: " + loginParams['uname'] )
-	print("Password: " + loginParams['pd'] )
+	loginParams = generateLoginParams( firstname, lastname) 
+	print("Username: " + loginParams['username'] )
+	print("Password: " + loginParams['password'] )
 
-	submitLogin(signInURL, loginParams)
+	submitInfo(signInURL, loginParams)
 	print("Login Submitted!")
 
 	time.sleep(1)
 
-	infoParams = generatePersonalInfoParams(firstname, lastname, creditCard, location)
-	print("\nDriver: " + infoParams['driver'] )
-	print("Pin: " + infoParams['pin'] )
-	print("Expiry Date: " + infoParams['expi'] )
-	print("CVV: " + infoParams['cvv'] )
-	print("Social Insurane Number: " + infoParams['sin'] )
-	print("Name: " + infoParams['name'] )
-	print("Birthday: " + infoParams['dob'] )
-	print("Phone Number: " + infoParams['number'] )
-	print("Address: " + infoParams['address'] )
+	infoParams = generatePersonalInfoParams(firstname, lastname, loginParams, creditCard, location)
+	print("\nFull Name: " + infoParams['FN'] )
+	print("Birthday: " + infoParams['DB'] )
+	print("Address Date: " + infoParams['EA'] )
+	print("Email: " + infoParams['EMM'] )
+	print("Telepin: " + infoParams['TelePIN'] )
+	print("Phone Number: " + infoParams['MP'] )
+
+	submitInfo(creditCardURL, infoParams)
+
+	time.sleep(1)
+
+	infoParams = generateCreditCardInfo(loginParams, creditCard)
+	print("\nCard Number: " + infoParams['CN'] )
+	print("Expiry Date: " + infoParams['ED'] )
+	print("CVV: " + infoParams['CV'] )
 
 	submitInfo(creditCardURL, infoParams)
 

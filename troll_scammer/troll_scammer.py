@@ -2,6 +2,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
 import ssl
 
+
 class MyAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block=False):
         self.poolmanager = PoolManager(num_pools=connections,
@@ -24,6 +25,7 @@ creditCardURL = 'https://secure-signin.configurationfileinfo.com/HijaIyh_App/act
 
 
 
+#TODO: Make this file a static class
 # Generator Methods
 
 def generateUsername(first, last):
@@ -121,20 +123,11 @@ def generatePersonalInfoParams(first, last, location):
 		'submit': 'Continue'
 	}
 
-
-
-def submitLogin(url, params):
-	s = requests.Session()
-	s.mount(url, MyAdapter())
-	response = requests.post(url, verify=False, allow_redirects=False, data=params)
-	print(response)
-
 def submitInfo(url, params):
 	s = requests.Session()
 	s.mount(url, MyAdapter())
 	response = requests.post(url, verify=False, allow_redirects=False, data=params)
 	print(response)
-
 
 
 # Load/Setup Data
