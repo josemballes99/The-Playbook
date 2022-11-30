@@ -10,3 +10,7 @@ TrollScammer1 contains a ton of methods which I use in TrollScammer2 when execut
 
 ## Data Check
 A quick script that saves REST requests to a file. Useful for cases where you have to make comparisons with your local to check that they dont affect the buisness logic in other environments.
+
+## Bash Scripts
+### Convert to Universal
+Script to convert all contents in a directory from Apple formats (HEIC & MOV) to the more universally accepted types JPG & MP4.
